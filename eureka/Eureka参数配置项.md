@@ -213,7 +213,18 @@ Eureka服务器在接收到实例的最后一次发出的心跳后，需要等�
 
 * 26、 Namespace  
 获取用于查找属性的命名空间，默认为eureka  
-&bnsp;&bnsp;
+&nbsp;&nbsp;
 
 ## Eureka服务端配置
+* 1、 AWSAccessId  
+获取aws访问的id，主要用于弹性ip绑定，此配置是用于aws上的，默认为null
 
+* 2、 
+* 3、 
+* 4、 
+* 5、 
+* 6、 
+* 7、 
+* 8、 
+* 9、 
+* 10、 
