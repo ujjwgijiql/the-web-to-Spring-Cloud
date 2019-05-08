@@ -364,3 +364,72 @@ eureka服务器中获取的内容是否在远程地区被压缩，默认为true
 * 49、 RemoteRegionUrlsWithName  
 针对远程地区发现的网址域名的map
 
+* 50、 RemoteRegionUrls  
+远程地区的URL列表
+
+* 51、 RemoteRegionAppWhitelist（*）  
+必须通过远程区域中检索的应用程序的列表
+
+* 52、 RemoteRegionRegistryFetchInterval  
+从远程区域取出该注册表的信息的时间间隔，默认为30秒
+
+* 53、 RemoteRegionFetchThreadPoolSize  
+用于执行远程区域注册表请求的线程池的大小，默认为20
+
+* 54、 RemoteRegionTrustStore  
+用来合格请求远程区域注册表的信任存储文件，默认为空
+
+* 55、 RemoteRegionTrustStorePassword  
+获取偏远地区信任存储文件的密码，默认为“changeit”
+
+* 56、 disableTransparentFallbackToOtherRegion(*)  
+如果在远程区域本地没有实例运行，对于应用程序回退的旧行为是否被禁用， 默认为false
+
+* 57、 BatchReplication(*)  
+表示集群节点之间的复制是否为了网络效率而进行批处理，默认为false
+
+* 58、 LogIdentityHeaders(*)  
+Eureka服务器是否应该登录clientAuthHeaders，默认为true
+
+* 59、 RateLimiterEnabled  
+限流是否应启用或禁用，默认为false
+
+* 60、 RateLimiterThrottleStandardClients  
+是否对标准客户端进行限流，默认false
+
+* 61、 RateLimiterPrivilegedClients（*）  
+认证的客户端列表，这里是除了标准的eureka Java客户端。
+
+* 62、 RateLimiterBurstSize（*）  
+速率限制的burst size ，默认为10，这里用的是令牌桶算法
+
+* 63、 RateLimiterRegistryFetchAverageRate(*)  
+速率限制器用的是令牌桶算法，此配置指定平均执行注册请求速率，默认为500
+
+* 64、 RateLimiterFullFetchAverageRate（*）  
+速率限制器用的是令牌桶算法，此配置指定平均执行请求速率，默认为100
+
+* 65、 ListAutoScalingGroupsRoleName（*）  
+用来描述从AWS第三账户的自动缩放组中的角色名称，默认为“ListAutoScalingGroups”
+
+* 66、 JsonCodecName（*）  
+如果没有设置默认的编解码器将使用全JSON编解码器，获取的是编码器的类名称
+
+* 67、 XmlCodecName(*)  
+如果没有设置默认的编解码器将使用xml编解码器，获取的是编码器的类名称
+
+* 68、 BindingStrategy(*)  
+获取配置绑定EIP或Route53的策略。
+
+* 69、 Route53DomainTTL（*）  
+用于建立route53域的ttl，默认为301
+
+* 70、 Route53BindRebindRetries（*）  
+服务器尝试绑定到候选Route53域的次数，默认为3
+
+* 71、 Route53BindingRetryIntervalMs（*）  
+服务器应该检查是否和Route53域绑定的时间间隔，默认为5 * 60 * 1000毫秒
+
+* 72、 Experimental(*)  
+ 当尝试新功能迁移过程时，为了避免配置API污染，相应的配置即可投入实验配置部分，默认为null
+ 
