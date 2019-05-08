@@ -219,12 +219,148 @@ Eureka服务器在接收到实例的最后一次发出的心跳后，需要等�
 * 1、 AWSAccessId  
 获取aws访问的id，主要用于弹性ip绑定，此配置是用于aws上的，默认为null
 
-* 2、 
-* 3、 
-* 4、 
-* 5、 
-* 6、 
-* 7、 
-* 8、 
-* 9、 
-* 10、 
+* 2、 AWSSecretKey  
+获取aws私有秘钥，主要用于弹性ip绑定，此配置是用于aws上的，默认为null
+
+* 3、 EIPBindRebindRetries  
+获取服务器尝试绑定到候选的EIP的次数，默认为3
+
+* 4、 EIPBindingRetryIntervalMsWhenUnbound(*)  
+服务器检查ip绑定的时间间隔，单位为毫秒，默认为1 * 60 * 1000
+
+* 5、 EIPBindingRetryIntervalMs  
+与上面的是同一作用，仅仅是稳定状态检查，默认为5 * 60 * 1000
+
+* 6、 EnableSelfPreservation  
+自我保护模式，当出现网络分区、eureka在短时间内丢失过多客户端时，会进入自我保护模式，  
+即一个服务长时间没有发送心跳，eureka也不会将其删除，默认为true
+
+* 7、 RenewalPercentThreshold(*)  
+阈值因子，默认是0.85，如果阈值比最小值大，则自我保护模式开启
+
+* 8、 RenewalThresholdUpdateIntervalMs  
+阈值更新的时间间隔，单位为毫秒，默认为15 * 60 * 1000
+
+* 9、 PeerEurekaNodesUpdateIntervalMs(*)  
+集群里eureka节点的变化信息更新的时间间隔，单位为毫秒，默认为10 * 60 * 1000
+
+* 10、 EnableReplicatedRequestCompression  
+复制的数据在发送请求时是否被压缩，默认为false
+
+* 11、 NumberOfReplicationRetries  
+获取集群里服务器尝试复制数据的次数，默认为5
+
+* 12、 PeerEurekaStatusRefreshTimeIntervalMs  
+服务器节点的状态信息被更新的时间间隔，单位为毫秒，默认为30 * 1000
+
+* 13、 WaitTimeInMsWhenSyncEmpty(*)  
+在Eureka服务器获取不到集群里对等服务器上的实例时，需要等待的时间，单位为毫秒，默认为1000 * 60 * 5
+
+* 14、 PeerNodeConnectTimeoutMs  
+连接对等节点服务器复制的超时的时间，单位为毫秒，默认为200
+
+* 15、 PeerNodeReadTimeoutMs  
+读取对等节点服务器复制的超时的时间，单位为毫秒，默认为200
+
+* 16、 PeerNodeTotalConnections  
+获取对等节点上http连接的总数，默认为1000
+
+* 17、 PeerNodeTotalConnectionsPerHost(*)  
+获取特定的对等节点上http连接的总数，默认为500
+
+* 18、 PeerNodeConnectionIdleTimeoutSeconds(*)  
+http连接被清理之后服务器的空闲时间，默认为30秒
+
+* 19、 RetentionTimeInMSInDeltaQueue(*)  
+客户端保持增量信息缓存的时间，从而保证不会丢失这些信息，单位为毫秒，默认为3 * 60 * 1000
+
+* 20、 DeltaRetentionTimerIntervalInMs  
+清理任务程序被唤醒的时间间隔，清理过期的增量信息，单位为毫秒，默认为30 * 1000
+
+* 21、 EvictionIntervalTimerInMs  
+过期实例应该启动并运行的时间间隔，单位为毫秒，默认为60 * 1000
+
+* 22、 ASGQueryTimeoutMs（*）  
+查询AWS上ASG（自动缩放组）信息的超时值，单位为毫秒，默认为300
+
+* 23、 ASGUpdateIntervalMs  
+从AWS上更新ASG信息的时间间隔，单位为毫秒，默认为5 * 60 * 1000
+
+* 24、 ASGCacheExpiryTimeoutMs(*)  
+缓存ASG信息的到期时间，单位为毫秒，默认为10 * 60 * 1000
+
+* 25、 ResponseCacheAutoExpirationInSeconds（*）  
+当注册表信息被改变时，则其被保存在缓存中不失效的时间，默认为180秒
+
+* 26、 ResponseCacheUpdateIntervalMs（*）  
+客户端的有效负载缓存应该更新的时间间隔，默认为30 * 1000毫秒
+
+* 27、 UseReadOnlyResponseCache（*）  
+ 目前采用的是二级缓存策略，一个是读写高速缓存过期策略，另一个没有过期只有只读缓存，默认为true，表示只读缓存
+
+* 28、 DisableDelta（*）  
+增量信息是否可以提供给客户端看，默认为false
+
+* 29、 MaxIdleThreadInMinutesAgeForStatusReplication（*）  
+状态复制线程可以保持存活的空闲时间，默认为10分钟
+
+* 30、 MinThreadsForStatusReplication  
+被用于状态复制的线程的最小数目，默认为1
+
+* 31、 MaxThreadsForStatusReplication  
+被用于状态复制的线程的最大数目，默认为1
+
+* 32、 MaxElementsInStatusReplicationPool  
+可允许的状态复制池备份复制事件的最大数量，默认为10000
+
+* 33、 SyncWhenTimestampDiffers  
+当时间变化实例是否跟着同步，默认为true
+
+* 34、 RegistrySyncRetries  
+当eureka服务器启动时尝试去获取集群里其他服务器上的注册信息的次数，默认为5
+
+* 35、 RegistrySyncRetryWaitMs  
+当eureka服务器启动时获取其他服务器的注册信息失败时，会再次尝试获取，期间需要等待的时间，默认为30 * 1000毫秒
+
+* 36、 MaxElementsInPeerReplicationPool（*）  
+复制池备份复制事件的最大数量，默认为10000
+
+* 37、 MaxIdleThreadAgeInMinutesForPeerReplication（*）  
+复制线程可以保持存活的空闲时间，默认为15分钟
+
+* 38、 MinThreadsForPeerReplication（*）  
+获取将被用于复制线程的最小数目，默认为5
+
+* 39、 MaxThreadsForPeerReplication  
+ 获取将被用于复制线程的最大数目，默认为20
+
+* 40、 MaxTimeForReplication（*）  
+尝试在丢弃复制事件之前进行复制的时间，默认为30000毫秒
+
+* 41、 PrimeAwsReplicaConnections（*）  
+对集群中服务器节点的连接是否应该准备，默认为true
+
+* 42、 DisableDeltaForRemoteRegions（*）  
+增量信息是否可以提供给客户端或一些远程地区，默认为false
+
+* 43、 RemoteRegionConnectTimeoutMs（*）  
+连接到对等远程地eureka节点的超时时间，默认为1000毫秒
+
+* 44、 RemoteRegionReadTimeoutMs（*）  
+获取从远程地区eureka节点读取信息的超时时间，默认为1000毫秒
+
+* 45、 RemoteRegionTotalConnections  
+获取远程地区对等节点上http连接的总数，默认为1000
+
+* 46、 RemoteRegionTotalConnectionsPerHost  
+ 获取远程地区特定的对等节点上http连接的总数，默认为500
+
+* 47、 RemoteRegionConnectionIdleTimeoutSeconds  
+http连接被清理之后远程地区服务器的空闲时间，默认为30秒
+
+* 48、 GZipContentFromRemoteRegion（*）  
+eureka服务器中获取的内容是否在远程地区被压缩，默认为true
+
+* 49、 RemoteRegionUrlsWithName  
+针对远程地区发现的网址域名的map
+
