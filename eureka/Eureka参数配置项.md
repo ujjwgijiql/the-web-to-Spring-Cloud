@@ -134,7 +134,86 @@ eureka服务器序列化/反序列化的信息中获取“_”符号的的替换
 当尝试新功能迁移过程时，为了避免配置API污染，相应的配置即可投入实验配置部分，默认为null  
 &nbsp;&nbsp;
 
-# 实例微服务端配置
+## 实例微服务端配置
+* 1、 InstanceId  
+此实例注册到eureka服务端的唯一的实例ID,其组成为  
+${spring.application.name}:${spring.application.instance_id:${random.value}}
 
+* 2、 Appname  
+获得在eureka服务上注册的应用程序的名字，默认为unknow
 
+* 3、 AppGroupName  
+获得在eureka服务上注册的应用程序组的名字，默认为unknow
+
+* 4、 InstanceEnabledOnit（*）  
+实例注册到eureka服务器时，是否开启通讯，默认为false
+
+* 5、 NonSecurePort  
+获取该实例应该接收通信的非安全端口。默认为80
+
+* 6、 SecurePort  
+获取该实例应该接收通信的安全端口，默认为443
+
+* 7、 NonSecurePortEnabled  
+该实例应该接收通信的非安全端口是否启用，默认为true
+
+* 8、 SecurePortEnabled  
+该实例应该接收通信的安全端口是否启用，默认为false
+
+* 9、 LeaseRenewalIntervalInSeconds  
+eureka客户需要多长时间发送心跳给eureka服务器，表明它仍然活着,默认为30 秒
+
+* 10、 LeaseExpirationDurationInSeconds  
+Eureka服务器在接收到实例的最后一次发出的心跳后，需要等待多久才可以将此实例删除，默认为90秒
+
+* 11、 VirtualHostName  
+此实例定义的虚拟主机名，其他实例将通过使用虚拟主机名找到该实例。
+
+* 12、 SecureVirtualHostName  
+此实例定义的安全虚拟主机名
+
+* 13、 ASGName（*）  
+与此实例相关联 AWS自动缩放组名称。此项配置是在AWS环境专门使用的实例启动，它已被用于流量停用后自动把一个实例退出服务。
+
+* 14、 HostName  
+与此实例相关联的主机名，是其他实例可以用来进行请求的准确名称
+
+* 15、 MetadataMap(*)  
+获取与此实例相关联的元数据(key,value)。这个信息被发送到eureka服务器，其他实例可以使用。
+
+* 16、 DataCenterInfo（*）  
+该实例被部署在数据中心
+
+* 17、 IpAddress  
+获取实例的ip地址
+
+* 18、 StatusPageUrlPath（*）  
+获取此实例状态页的URL路径，然后构造出主机名，安全端口等，默认为/info
+
+* 19、 StatusPageUrl(*)  
+获取此实例绝对状态页的URL路径，为其他服务提供信息时来找到这个实例的状态的路径，默认为null
+
+* 20、 HomePageUrlPath（*）  
+获取此实例的相关主页URL路径，然后构造出主机名，安全端口等，默认为/
+
+* 21、 HomePageUrl(*)  
+获取此实例的绝对主页URL路径，为其他服务提供信息时使用的路径,默认为null
+
+* 22、 HealthCheckUrlPath  
+获取此实例的相对健康检查URL路径，默认为/health
+
+* 23、 HealthCheckUrl  
+获取此实例的绝对健康检查URL路径,默认为null
+
+* 24、 SecureHealthCheckUrl  
+获取此实例的绝对安全健康检查网页的URL路径，默认为null
+
+* 25、 DefaultAddressResolutionOrder  
+获取实例的网络地址，默认为[]
+
+* 26、 Namespace  
+获取用于查找属性的命名空间，默认为eureka  
+&bnsp;&bnsp;
+
+## Eureka服务端配置
 
