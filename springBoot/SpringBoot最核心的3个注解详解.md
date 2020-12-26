@@ -89,4 +89,4 @@ public @interface SpringBootApplication {
 }
 ```
 
-![](.\image\SpringBootApplication.jpg)
+![](https://github.com/zhang-jh/the-web-to-Spring-Cloud/tree/master/springBoot/image/SpringBootApplication.jpg)
