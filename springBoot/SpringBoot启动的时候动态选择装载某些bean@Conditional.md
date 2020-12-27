@@ -1,6 +1,93 @@
 # SpringBoot启动的时候动态选择装载某些bean
 
-# @ConditionalOnProperty使用详解
+​        @ConditionalOnBean（上下文存在某个对象时，才会实例化一个bean）
+
+​        @ConditionalOnClass（存在某个类时，不存在也不能填啊，汗、、、）
+
+​        @ConditionalOnExpression（表达式为true的时候，才会实例化一个Bean）
+
+​        @ConditionalOnMissingBean（上下文中不存在某个对象时，才会实例化一个Bean）
+
+​        @ConditionalOnMissingClass（按意思是不存在某个类的时候偶会进入条件，但是测试并没有用，不知怎么回事）
+
+​        @ConditionalOnNotWebApplication（不是web应用的时候，条件成立）
+
+​        @ConditionalOnProperty（这个更配置文件有关，对配置属性的判断）
+
+
+
+# 1、@Conditional注解
+
+**作用：**@Conditional是Spring4新提供的注解，它的作用是按照一定的条件进行判断，满足条件的才给容器注册Bean。
+
+
+
+### 1.1、概述
+
+#### 1.1.1、@Conditional注解定义
+
+```java
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Conditional {
+    Class<? extends Condition>[] value();
+}
+```
+
+#### 1.1.2、Condition
+
+​        我们点进去看后，发现它是一个接口，有一个方法。
+
+```java
+@FunctionalInterface
+public interface Condition {
+    boolean matches(ConditionContext var1, AnnotatedTypeMetadata var2);
+}
+```
+
+#### 1.1.3、ConditionContext
+
+​        它持有不少有用的对象，可以用来获取很多系统相关的信息，来丰富条件判断，接口定义如下
+
+```java
+public interface ConditionContext {
+    /**
+     * 获取Bean定义
+     */
+    BeanDefinitionRegistry getRegistry();
+    /**
+     * 获取Bean工程，因此就可以获取容器中的所有bean
+     */
+    @Nullable
+    ConfigurableListableBeanFactory getBeanFactory();
+    /**
+     * environment 持有所有的配置信息
+     */
+    Environment getEnvironment();
+    /**
+     * 资源信息
+     */
+    ResourceLoader getResourceLoader();
+    /**
+     * 类加载信息
+     */
+    @Nullable
+    ClassLoader getClassLoader();
+}
+```
+
+
+
+### 1.2、案例
+
+**需求：**根据当前系统环境的的不同实例不同的Bean，比如现在是Mac那就实例一个Bean,如果是Window系统实例另一个Bean。
+
+
+
+
+
+# 2、@ConditionalOnProperty使用详解
 
 
 
@@ -103,16 +190,3 @@ spring.http.encoding.enabled=true
 
 
 
-@ConditionalOnBean（上下文存在某个对象时，才会实例化一个bean）
-
-@ConditionalOnClass（存在某个类时，不存在也不能填啊，汗、、、）
-
-@ConditionalOnExpression（表达式为true的时候，才会实例化一个Bean）
-
-@ConditionalOnMissingBean（上下文中不存在某个对象时，才会实例化一个Bean）
-
-@ConditionalOnMissingClass（按意思是不存在某个类的时候偶会进入条件，但是测试并没有用，不知怎么回事）
-
-@ConditionalOnNotWebApplication（不是web应用的时候，条件成立）
-
-@ConditionalOnProperty（这个更配置文件有关，对配置属性的判断）
