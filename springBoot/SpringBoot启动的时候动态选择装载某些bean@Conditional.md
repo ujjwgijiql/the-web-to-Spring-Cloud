@@ -2,13 +2,13 @@
 
 ​        @ConditionalOnBean（上下文存在某个对象时，才会实例化一个bean）
 
-​        @ConditionalOnClass（存在某个类时，不存在也不能填啊，汗、、、）
+​        @ConditionalOnClass（当给定的类名在类路径上存在，则实例化当前Bean）
 
 ​        @ConditionalOnExpression（表达式为true的时候，才会实例化一个Bean）
 
 ​        @ConditionalOnMissingBean（上下文中不存在某个对象时，才会实例化一个Bean）
 
-​        @ConditionalOnMissingClass（按意思是不存在某个类的时候偶会进入条件，但是测试并没有用，不知怎么回事）
+​        @ConditionalOnMissingClass（当给定的类名在类路径上不存在，则实例化当前Bean）
 
 ​        @ConditionalOnNotWebApplication（不是web应用的时候，条件成立）
 
@@ -83,11 +83,357 @@ public interface ConditionContext {
 
 **需求：**根据当前系统环境的的不同实例不同的Bean，比如现在是Mac那就实例一个Bean,如果是Window系统实例另一个Bean。
 
+#### 1.2.1、SystemBean
+
+​        首先创建一个Bean类
+
+```java
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class SystemBean {
+    
+    /** 系统名称 */
+    private String systemName;
+    
+    /** 系统code */
+    private String systemCode;
+}
+```
+
+#### 1.2.2、通过Configuration配置实例化Bean
+
+```java
+@Slf4j
+@Configuration
+public class ConditionalConfig {
+    /**
+     * 如果WindowsCondition的实现方法返回true，则注入这个bean
+     */
+    @Bean("windows")
+    @Conditional({WindowsCondition.class})
+    public SystemBean systemWi() {
+        log.info("ConditionalConfig方法注入 windows实体");
+        return new SystemBean("windows系统","002");
+    }
+    /**
+     * 如果LinuxCondition的实现方法返回true，则注入这个bean
+     */
+    @Bean("mac")
+    @Conditional({MacCondition.class})
+    public SystemBean systemMac() {
+        log.info("ConditionalConfig方法注入 mac实体");
+        return new SystemBean("Mac ios系统","001");
+    }
+}
+```
+
+#### 1.2.3、WindowsCondition和MacCondition
+
+​        这两个类都实现了Condition接口, `只有matches方法返回true才会实例化当前Bean`。
+
+**1）WindowsCondition**
+
+```java
+@Slf4j
+public class WindowsCondition implements Condition {
+    /**
+     * @param conditionContext:判断条件能使用的上下文环境
+     * @param annotatedTypeMetadata:注解所在位置的注释信息
+     */
+    @Override
+    public boolean matches(ConditionContext conditionContext, AnnotatedTypeMetadata annotatedTypeMetadata) {
+        
+        // 获取ioc使用的beanFactory
+        ConfigurableListableBeanFactory beanFactory = conditionContext.getBeanFactory();
+        
+        // 获取类加载器
+        ClassLoader classLoader = conditionContext.getClassLoader();
+        
+        // 获取当前环境信息
+        Environment environment = conditionContext.getEnvironment();
+        
+        // 获取bean定义的注册类
+        BeanDefinitionRegistry registry = conditionContext.getRegistry();
+        
+        // 获得当前系统名
+        String property = environment.getProperty("os.name");
+        
+        // 包含Windows则说明是windows系统，返回true
+        if (property.contains("Windows")){
+            log.info("当前操作系统是：Windows");
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+**2) MacCondition**
+
+```java
+@Slf4j
+public class MacCondition implements Condition {
+
+   @Override
+    public boolean matches(ConditionContext conditionContext, AnnotatedTypeMetadata annotatedTypeMetadata) {
+        Environment environment = conditionContext.getEnvironment();
+        String property = environment.getProperty("os.name");
+        if (property.contains("Mac")) {
+            log.info("当前操作系统是：Mac OS X");
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+#### 1.2.4、测试类测试
+
+```java
+@SpringBootTest(classes = Application.class)
+@RunWith(SpringRunner.class)
+public class TestConditionOn {
+
+    @Autowired
+    private SystemBean windows;
+    @Autowired
+    private SystemBean mac;
+
+    @Test
+    public void test() {
+        if (windows != null) {
+            System.out.println("windows = " + windows);
+        }
+        if (mac != null) {
+            System.out.println("linux = " + mac);
+        }
+    }
+}
+```
+
+**运行结果**
+
+​        通过运行结果可以看出
+
+```java
+2020-12-28 14:06:27.412  INFO 5216 --- [           main] s.boot.conditional.WindowsCondition      : 当前操作系统是：Windows
+2020-12-28 14:06:27.955  INFO 5216 --- [           main] s.boot.conditional.ConditionalConfig     : ConditionalConfig方法注入 windows实体
+2020-12-28 14:06:28.451  INFO 5216 --- [           main] spring.boot.conditional.TestConditionOn  : Started TestConditionOn in 2.454 seconds (JVM running for 4.742)
+windows = SystemBean(systemName=windows系统, systemCode=002)
+linux = SystemBean(systemName=windows系统, systemCode=002)
+```
+
+1、虽然配置两个Bean,但这里只实例化了一个Bean,因为我这边是Mac电脑，所以实例化的是mac的SystemBean
+
+2、注意一点，我们可以看出 `window`并不为null,而是mac实例化的Bean。说明 只要实例化一个Bean的，不管你命名什么，都可以注入这个Bean。
+
+**修改一下**
+
+​        这里做一个修改,我们把`ConditionalConfig`中的这行代码注释掉。
+
+```java
+// @Conditional({MacCondition.class})
+```
+
+**再运行下代码**
+
+```
+2020-12-28 14:15:42.555  INFO 27036 --- [           main] s.boot.conditional.WindowsCondition      : 当前操作系统是：Windows
+2020-12-28 14:15:43.015  INFO 27036 --- [           main] s.boot.conditional.ConditionalConfig     : ConditionalConfig方法注入 windows实体
+2020-12-28 14:15:43.020  INFO 27036 --- [           main] s.boot.conditional.ConditionalConfig     : ConditionalConfig方法注入 mac实体
+2020-12-28 14:15:43.341  INFO 27036 --- [           main] spring.boot.conditional.TestConditionOn  : Started TestConditionOn in 2.159 seconds (JVM running for 4.545)
+windows = SystemBean(systemName=windows系统, systemCode=002)
+linux = SystemBean(systemName=Mac ios系统, systemCode=001)
+```
+
+​        通过运行结果可以看出，配置类的两个Bean都已经注入成功了。
+
+**注意** 当同一个对象被注入两次及以上的时候，那么你在使用当前对象的时候，名称一定要是两个bean名称的一个,否则报错。比如修改为
+
+```java
+@Autowired
+private SystemBean windows;
+@Autowired
+private SystemBean mac;
+@Autowired
+private SystemBean linux;
+```
+
+​        再启动发现，报错了。
+
+```
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'spring.boot.conditional.TestConditionOn': Unsatisfied dependency expressed through field 'linux'; nested exception is org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type 'spring.boot.conditional.SystemBean' available: expected single matching bean but found 2: windows,mac
+```
+
+​        意思很明显，就是上面只实例化成功一个SystemBean的时候，你取任何名字，反正就是把当前已经实例化的对象注入给你就好了。
+但是你现在同时注入了两个SystemBean,你这个时候有个名称为linux，它不知道应该注入那个Bean,所以采用了报错的策略。
 
 
 
+# 2、@ConditionalOnBean与@ConditionalOnClass、@ConditionalOnMissingBean、@ConditionalOnMissingClass
 
-# 2、@ConditionalOnProperty使用详解
+### 2.1、@ConditionalOnBean概念
+
+**需求场景** 比如下面一种场景，我在实例化People对象的时候，需要注入一个City对象。这个时候问题来了，如果city没有实例化，那么下面就会报空指针或者直接报错。
+        所以这里需求很简单，就是当前city存在则实例化people,如果不存在则不实例化people,这个时候**@ConditionalOnBean** 的作用来了。
+
+```java
+    @Bean
+    public People people(City city) {
+        //这里如果city实体没有成功注入 这里就会报空指针
+        city.setCityName("千岛湖");
+        city.setCityCode(301701);
+        return new People("小小", 3, city);
+    }
+```
+
+#### 2.1.1、@ConditionalOnBean注解定义
+
+```java
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Conditional(OnBeanCondition.class)
+public @interface ConditionalOnBean {
+    /**
+     * 需要作为条件的类的Class对象数组
+     */
+    Class<?>[] value() default {};
+    /**
+     * 需要作为条件的类的Name,Class.getName()
+     */
+    String[] type() default {};
+    /**
+     *  (用指定注解修饰的bean)条件所需的注解类
+     */
+    Class<? extends Annotation>[] annotation() default {};
+    /**
+     * spring容器中bean的名字
+     */
+    String[] name() default {};
+    /**
+     * 搜索容器层级,当前容器,父容器
+     */
+    SearchStrategy search() default SearchStrategy.ALL;
+    /**
+     * 可能在其泛型参数中包含指定bean类型的其他类
+     */
+    Class<?>[] parameterizedContainer() default {};
+}
+```
+
+### 2.2、@ConditionalOnBean示例
+
+#### 2.2.1、Bean实体
+
+**1）City类**
+
+```java
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class City {
+    /**
+     * 城市名称
+     */
+    private String cityName;
+    /**
+     * 城市code
+     */
+    private Integer cityCode;
+}
+```
+
+**2）People类**
+
+​        这里City作为People一个属性字段。
+
+```java
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class People {
+  /**
+     * 姓名
+     */
+    private String name;
+    /**
+     * 年龄
+     */
+    private Integer age;
+    /**
+     *  城市信息
+     */
+    private City city;
+}
+```
+
+#### 2.2.2、Config类
+
+​        这里写个正常的配置类，City成功注入到IOC容器中。
+
+```java
+@Slf4j
+@Configuration
+public class Config {
+    @Bean
+    public City city() {
+        City city = new City();
+        city.setCityName("千岛湖");
+        return city;
+    }
+    @Bean
+    public People people(City city) {
+        //这里如果city实体没有成功注入 这里就会报空指针
+        city.setCityCode(301701);
+        return new People("小小", 3, city);
+    }
+}
+```
+
+#### 2.2.3、Test测试类
+
+```java
+@SpringBootTest(classes = Application.class)
+@RunWith(SpringRunner.class)
+public class TestConditionOn {
+
+    @Autowired(required=false)
+    private People people;
+    
+    @Test
+    public void test() {
+        System.out.println("= = = = = = = = = = = = = ");
+        System.out.println("people = " + people);
+        System.out.println("= = = = = = = = = = = = = ");
+    }
+}
+```
+
+​        运行结果
+
+​        一切正常，这个很符合我们实际开发中的需求。但是如果有一种情况，就是我的city并没有被注入。我把上面这部分注视掉。
+
+​        **再运行测试类**
+
+​        发现启动直接报错了，这当然不是我们希望看到的，我们是要当city已经注入那么实例化people，如果没有注入那么不实例化people。
+
+​        **再运行测试类**
+
+​        很明显，上面因为city已经注释调，所以也导致无法实例化people，所以people为null。
+
+**注意 **有点要注意的，就是一旦使用@Autowired那就默认代表当前Bean一定是已经存在的，如果为null，会报错。所以这里要修改下。
+
+```java
+@Autowired(required=false) //required=false 的意思就是允许当前的Bean对象为null。
+```
+
+**总结** 讲了这个注解，其它三个注解的意思大致差不多，在实际开发过程中可以根据实际情况使用该注解。
+
+
+
+# 3、@ConditionalOnProperty使用详解
 
 
 
