@@ -334,13 +334,10 @@ public @interface ConditionalOnBean {
 @AllArgsConstructor
 @NoArgsConstructor
 public class City {
-    /**
-     * 城市名称
-     */
+    /** 城市名称 */
     private String cityName;
-    /**
-     * 城市code
-     */
+    
+    /** 城市code */
     private Integer cityCode;
 }
 ```
@@ -354,17 +351,13 @@ public class City {
 @NoArgsConstructor
 @AllArgsConstructor
 public class People {
-  /**
-     * 姓名
-     */
+    /** 姓名 */
     private String name;
-    /**
-     * 年龄
-     */
+    
+    /** 年龄 */
     private Integer age;
-    /**
-     *  城市信息
-     */
+    
+    /** 城市信息 */
     private City city;
 }
 ```
@@ -374,18 +367,19 @@ public class People {
 ​        这里写个正常的配置类，City成功注入到IOC容器中。
 
 ```java
-@Slf4j
 @Configuration
 public class Config {
+    
     @Bean
     public City city() {
         City city = new City();
         city.setCityName("千岛湖");
         return city;
     }
+    
     @Bean
     public People people(City city) {
-        //这里如果city实体没有成功注入 这里就会报空指针
+        // 这里如果city实体没有成功注入 这里就会报空指针
         city.setCityCode(301701);
         return new People("小小", 3, city);
     }
@@ -413,13 +407,63 @@ public class TestConditionOn {
 
 ​        运行结果
 
+```java
+= = = = = = = = = = = = = 
+people = People(name=小小, age=3, city=City(cityName=千岛湖, cityCode=301701))
+= = = = = = = = = = = = = 
+```
+
 ​        一切正常，这个很符合我们实际开发中的需求。但是如果有一种情况，就是我的city并没有被注入。我把上面这部分注视掉。
 
+```java
+//    @Bean
+//    public City city() {
+//        City city = new City();
+//        city.setCityName("千岛湖");
+//        return city;
+//    }
+```
+
 ​        **再运行测试类**
+
+```java
+Action:
+
+Consider defining a bean of type 'spring.boot.conditional.onbean.City' in your configuration.
+```
 
 ​        发现启动直接报错了，这当然不是我们希望看到的，我们是要当city已经注入那么实例化people，如果没有注入那么不实例化people。
 
+```java
+@Configuration
+public class Config {
+//    @Bean
+//    public City city() {
+//        City city = new City();
+//        city.setCityName("千岛湖");
+//        return city;
+//    }
+
+    /**
+     * 这里加了ConditionalOnBean注解，就代表如果city存在才实例化people
+     */
+    @Bean
+    @ConditionalOnBean(name = "city")
+    public People people(City city) {
+        // 这里如果city实体没有成功注入 这里就会报空指针
+        city.setCityCode(301701);
+        return new People("小小", 3, city);
+    }
+}
+```
+
 ​        **再运行测试类**
+
+```java
+= = = = = = = = = = = = = 
+people = null
+= = = = = = = = = = = = = 
+```
 
 ​        很明显，上面因为city已经注释调，所以也导致无法实例化people，所以people为null。
 
